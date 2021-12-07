@@ -1,0 +1,5 @@
+/venv
+/.venv
+/.idea
+*.pyc
+/stub_payment_service/configs/.env
