@@ -1,6 +1,7 @@
 from typing import Optional
 
 from fastapi import APIRouter, Header
+from fastapi.responses import JSONResponse
 
 from .exceptions import SameIdempRequest, AccountNotExist, NotEnoughMoney, NoIdempKey
 from .schemas import BalanceChange
@@ -10,34 +11,34 @@ router = APIRouter()
 
 
 @router.post('/top-up')
-async def top_up_balance(balance: BalanceChange, idempotency_key: Optional[str] = Header(None)):
+async def top_up_balance(balance_change: BalanceChange, idempotency_key: Optional[str] = Header(None)):
     try:
-        await peer_balance(balance.user_id, balance.amount, idempotency_key)
+        await peer_balance(balance_change.user_id, balance_change.amount, idempotency_key)
     except SameIdempRequest:
-        return {'result': 'success'}
+        return JSONResponse(content={'result': 'success'}, status_code=200)
     except NoIdempKey:
-        return {'result': 'failed', 'reason': 'no idempotency key provided'}
+        return JSONResponse(content={'result': 'failed', 'reason': 'no idempotency key provided'}, status_code=400)
     except AccountNotExist:
-        return {'result': 'failed', 'reason': 'account does not exist'}
+        return JSONResponse(content={'result': 'failed', 'reason': 'account does not exist'}, status_code=400)
     except Exception as exc:
-        return {'result': 'failed', 'reason': 'internal error'}
+        return JSONResponse(content={'result': 'failed', 'reason': 'internal error'}, status_code=500)
     else:
-        return {'result': 'success'}
+        return JSONResponse(content={'result': 'success'}, status_code=200)
 
 
 @router.post('/top-down')
-async def top_down_balance(balance: BalanceChange, idempotency_key: Optional[str] = Header(None)):
+async def top_down_balance(balance_change: BalanceChange, idempotency_key: Optional[str] = Header(None)):
     try:
-        await peer_balance(balance.user_id, -balance.amount, idempotency_key)
+        await peer_balance(balance_change.user_id, -balance_change.amount, idempotency_key)
     except SameIdempRequest:
-        return {'result': 'success'}
-    except AccountNotExist:
-        return {'result': 'failed', 'reason': 'account does not exist'}
+        return JSONResponse(content={'result': 'success'}, status_code=200)
     except NoIdempKey:
-        return {'result': 'failed', 'reason': 'no idempotency key provided'}
+        return JSONResponse(content={'result': 'failed', 'reason': 'no idempotency key provided'}, status_code=400)
+    except AccountNotExist:
+        return JSONResponse(content={'result': 'failed', 'reason': 'account does not exist'}, status_code=400)
     except NotEnoughMoney:
-        return {'result': 'failed', 'reason': 'not enough money'}
+        return JSONResponse(content={'result': 'failed', 'reason': 'not enough money'}, status_code=400)
     except Exception as exc:
-        return {'result': 'failed', 'reason': 'internal error'}
+        return JSONResponse(content={'result': 'failed', 'reason': 'internal error'}, status_code=500)
     else:
-        return {'result': 'success'}
+        return JSONResponse(content={'result': 'success'}, status_code=200)
