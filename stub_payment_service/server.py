@@ -10,7 +10,7 @@ from .router import router
 from .db_service import DBConnectionContext
 from .loggers import logger
 from .utils import create_strict_periodic_task
-# from .errors.error_handlers import http422_error_handler, http_error_handler, server_error_handler
+# from .error_handlers import http422_error_handler, http_error_handler, server_error_handler
 
 
 def get_app() -> FastAPI:

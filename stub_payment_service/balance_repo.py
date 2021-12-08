@@ -67,7 +67,7 @@ async def exchange_balance(payer_user_id: str,
             try:
                 current_ts = int(time.time())
                 await conn.fetch(
-                    f'''INSERT INTO paymentKey (userId, externalKey) VALUES ('{payer_user_id}', '{idempotency_key}'), {current_ts}'''
+                    f'''INSERT INTO paymentKey (userId, externalKey, createdTS) VALUES ('{payer_user_id}', '{idempotency_key}', {current_ts})'''
                 )
             except UniqueViolationError as exc:
                 raise SameIdempRequest from exc
