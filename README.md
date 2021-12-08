@@ -1,4 +1,4 @@
-##E NV setup:
+## ENV setup:
 
 File ".env" must be created in PROJECTROOT/stub_payment_service/configs and filled according to Settings class in config.py
 
