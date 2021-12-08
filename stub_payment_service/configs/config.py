@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     db_user: str
     debug: bool = True
     host: str
+    log_lvl: str = 'INFO'
     port: int
     version: str = '0.0.1'
 

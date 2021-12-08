@@ -1,4 +1,5 @@
-from typing import Optional, Tuple
+from typing import Optional
+import time
 
 from asyncpg.exceptions import UniqueViolationError
 
@@ -15,8 +16,9 @@ async def peer_balance(user_id: str, amount: int, idempotency_key: Optional[str]
         try:
             await trans.start()
             try:
+                current_ts = int(time.time())
                 await conn.fetch(
-                    f'''INSERT INTO paymentKey (userId, externalKey) VALUES ('{user_id}', '{idempotency_key}')'''
+                    f'''INSERT INTO paymentKey (userId, externalKey, createdTS) VALUES ('{user_id}', '{idempotency_key}', {current_ts})'''
                 )
             except UniqueViolationError as exc:
                 raise SameIdempRequest from exc
@@ -63,8 +65,9 @@ async def exchange_balance(payer_user_id: str,
         try:
             await trans.start()
             try:
+                current_ts = int(time.time())
                 await conn.fetch(
-                    f'''INSERT INTO paymentKey (userId, externalKey) VALUES ('{payer_user_id}', '{idempotency_key}')'''
+                    f'''INSERT INTO paymentKey (userId, externalKey) VALUES ('{payer_user_id}', '{idempotency_key}'), {current_ts}'''
                 )
             except UniqueViolationError as exc:
                 raise SameIdempRequest from exc

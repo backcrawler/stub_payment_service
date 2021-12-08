@@ -16,9 +16,12 @@ CREATE SEQUENCE IF NOT EXISTS paymentKey_id_seq;
 CREATE TABLE IF NOT EXISTS paymentKey (
     id integer NOT NULL DEFAULT nextval('paymentKey_id_seq'),
     userId varchar(128) NOT NULL,
-    externalKey varchar(128) NOT NULL
+    externalKey varchar(128) NOT NULL,
+    createdTs integer NOT NULL
 );
 
 ALTER SEQUENCE paymentKey_id_seq OWNED BY paymentKey.id;
 
 CREATE UNIQUE INDEX IF NOT EXISTS paymentKey_idx ON paymentKey (userId, externalKey);
+
+CREATE INDEX IF NOT EXISTS paymentKey_createdTs_idx ON paymentKey (createdTs);

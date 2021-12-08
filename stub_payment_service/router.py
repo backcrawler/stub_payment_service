@@ -6,13 +6,14 @@ from fastapi.responses import JSONResponse
 
 from .exceptions import SameIdempRequest, AccountNotExist, NotEnoughMoney, NoIdempKey
 from .schemas import BalanceChange, MoneyExchange
+from .loggers import logger
 from .balance_repo import peer_balance, exchange_balance
 
 router = APIRouter()
 
 
 @router.post('/top-up')
-async def top_up_balance(balance_change: BalanceChange, idempotency_key: Optional[str] = Header(None)):  # todo: middleware
+async def top_up_balance(balance_change: BalanceChange, idempotency_key: Optional[str] = Header(None)):
     try:
         await peer_balance(balance_change.user_id, balance_change.amount, idempotency_key)
     except SameIdempRequest:
@@ -22,13 +23,14 @@ async def top_up_balance(balance_change: BalanceChange, idempotency_key: Optiona
     except AccountNotExist:
         return JSONResponse(content={'result': 'failed', 'reason': 'account does not exist'}, status_code=400)
     except Exception as exc:
+        logger.exception(f'Unexpected exception: {exc}')
         return JSONResponse(content={'result': 'failed', 'reason': 'internal error'}, status_code=500)
     else:
         return JSONResponse(content={'result': 'success'}, status_code=200)
 
 
 @router.post('/top-down')
-async def top_down_balance(balance_change: BalanceChange, idempotency_key: Optional[str] = Header(None)):
+async def top_down_balance(balance_change: BalanceChange, idempotency_key: Optional[str] = Header(None)):  # todo: middleware
     try:
         await peer_balance(balance_change.user_id, -balance_change.amount, idempotency_key)
     except SameIdempRequest:
@@ -40,6 +42,7 @@ async def top_down_balance(balance_change: BalanceChange, idempotency_key: Optio
     except NotEnoughMoney:
         return JSONResponse(content={'result': 'failed', 'reason': 'not enough money'}, status_code=400)
     except Exception as exc:
+        logger.exception(f'Unexpected exception: {exc}')
         return JSONResponse(content={'result': 'failed', 'reason': 'internal error'}, status_code=500)
     else:
         return JSONResponse(content={'result': 'success'}, status_code=200)
@@ -58,7 +61,7 @@ async def exchange_money(money: MoneyExchange, idempotency_key: Optional[str] = 
     except NotEnoughMoney:
         return JSONResponse(content={'result': 'failed', 'reason': 'not enough money'}, status_code=400)
     except Exception as exc:
-        logging.exception(f'EXC: {exc}')
+        logger.exception(f'Unexpected exception: {exc}')
         return JSONResponse(content={'result': 'failed', 'reason': 'internal error'}, status_code=500)
     else:
         return JSONResponse(content={'result': 'success'}, status_code=200)
