@@ -1,4 +1,4 @@
-##ENV setup:
+##E NV setup:
 
 File ".env" must be created in PROJECTROOT/stub_payment_service/configs and filled according to Settings class in config.py
 
@@ -6,7 +6,7 @@ File ".env" must be created in PROJECTROOT/stub_payment_service/configs and fill
 
 PostgreSQL is used as DB for the project.
 
-###DB setup:
+### DB setup:
 
 (Before this a database with name DBNAME must be created)
 
@@ -14,7 +14,7 @@ PostgreSQL is used as DB for the project.
 psql -h HOSTNAME -U USERNAME -f db_setup.sql DBNAME
 ```
 
-###DB clear:
+### DB clear:
 
 ```sql
 psql -h HOSTNAME -U USERNAME -f db_delete.sql DBNAME
@@ -22,7 +22,7 @@ psql -h HOSTNAME -U USERNAME -f db_delete.sql DBNAME
 
 Files "db_setup.sql" and "db_delete.sql" are situated in PROJECTROOT/tools
 
-##App start:
+## App start:
 
 ```bash
 python3 main.py
