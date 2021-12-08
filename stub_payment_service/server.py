@@ -10,7 +10,7 @@ from .router import router
 from .db_service import DBConnectionContext
 from .loggers import logger
 from .utils import create_strict_periodic_task
-# from .error_handlers import http422_error_handler, http_error_handler, server_error_handler
+from .error_handlers import http422_error_handler, server_error_handler
 
 
 def get_app() -> FastAPI:
@@ -19,9 +19,8 @@ def get_app() -> FastAPI:
 
     application.add_event_handler("startup", set_periodic)
 
-    # application.add_exception_handler(HTTPException, http_error_handler)
-    # application.add_exception_handler(RequestValidationError, http422_error_handler)
-    # application.add_exception_handler(Exception, server_error_handler)
+    application.add_exception_handler(RequestValidationError, http422_error_handler)
+    application.add_exception_handler(Exception, server_error_handler)
 
     application.include_router(router)
 
