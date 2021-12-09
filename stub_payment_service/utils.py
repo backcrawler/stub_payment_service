@@ -15,7 +15,7 @@ def create_strict_periodic_task(func: Callable, period: int, revokable=False) ->
                 await asyncio.sleep(period)
             except Exception as exc:
                 if revokable:
-                    logger.exception(f'Error while performing periodic task with {f.__name__} - {exc}')
+                    logger.exception(f'Error while performing periodic strict task with {f.__name__} - {exc}')
                     await asyncio.sleep(5)
                 else:
                     raise exc
@@ -23,18 +23,20 @@ def create_strict_periodic_task(func: Callable, period: int, revokable=False) ->
     return asyncio.create_task(inner(func))
 
 
-def create_adaptive_periodic_task(func: Callable[..., Awaitable[Any]], period: int, revokable=False) -> asyncio.Task:
-    async def inner(f: Callable) -> None:
+def create_adaptive_periodic_task(func: Callable[..., Awaitable[Any]], period: int) -> asyncio.Task:
+    def _handle_task_result(task: asyncio.Task) -> None:
+        try:
+            task.result()
+        except asyncio.CancelledError:
+            pass  # Task cancellation should not be logged as an error.
+        except Exception as exc:
+            logger.exception(f'Error while performing periodic adaptive task with {func.__name__} - {exc}')
+
+    async def inner(f: Callable[..., Awaitable[Any]]) -> None:
         while True:
-            try:
-                asyncio.create_task(f())
-                await asyncio.sleep(period)
-            except Exception as exc:
-                if revokable:
-                    logger.exception(f'Error while performing periodic task with {f.__name__} - {exc}')
-                    await asyncio.sleep(5)
-                else:
-                    raise exc
+            task = asyncio.create_task(f())
+            task.add_done_callback(_handle_task_result)
+            await asyncio.sleep(period)
 
     return asyncio.create_task(inner(func))
 
